@@ -58,8 +58,7 @@ export class CalorieTrackerMCP extends McpAgent<Env, {}, Props> {
         return listEntriesHandler(
           params as ListEntriesParams,
           this.props.userId,
-          this.env,
-          this.props.isAdmin
+          this.env
         );
       }
     );
@@ -107,8 +106,7 @@ export class CalorieTrackerMCP extends McpAgent<Env, {}, Props> {
         return addEntryHandler(
           params as AddEntryParams,
           this.props.userId,
-          this.env,
-          this.props.isAdmin
+          this.env
         );
       }
     );
@@ -157,8 +155,7 @@ export class CalorieTrackerMCP extends McpAgent<Env, {}, Props> {
         return updateEntryHandler(
           params as UpdateEntryParams,
           this.props.userId,
-          this.env,
-          this.props.isAdmin
+          this.env
         );
       }
     );
@@ -177,8 +174,7 @@ export class CalorieTrackerMCP extends McpAgent<Env, {}, Props> {
         return deleteEntryHandler(
           params as DeleteEntryParams,
           this.props.userId,
-          this.env,
-          this.props.isAdmin
+          this.env
         );
       }
     );

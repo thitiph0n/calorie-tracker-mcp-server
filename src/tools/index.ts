@@ -1,8 +1,11 @@
-// Export all tool handlers and schemas
-export * from './base.js';
-export * from './list-entries.js';
-export * from './add-entry.js';
-export * from './update-entry.js';
-export * from './delete-entry.js';
-export * from './register-user.js';
-export * from './revoke-user.js';
+// Export all tool handlers
+export { addEntryHandler } from './add-entry.js';
+export { listEntriesHandler } from './list-entries.js';
+export { updateEntryHandler } from './update-entry.js';
+export { deleteEntryHandler } from './delete-entry.js';
+export { registerUserHandler } from './register-user.js';
+export { revokeUserHandler } from './revoke-user.js';
+
+// Re-export types and utilities for convenience
+export * from '../types/index.js';
+export * from '../utils/responses.js';

@@ -1,64 +1,26 @@
-import {
-  ToolHandler,
-  createAuthError,
-  createSuccessResponse,
-  createErrorResponse,
-} from './base.js';
-
-export interface AddEntryParams {
-  food_name: string;
-  calories: number;
-  protein_g?: number;
-  carbs_g?: number;
-  fat_g?: number;
-  meal_type?: 'breakfast' | 'lunch' | 'dinner' | 'snack';
-  entry_date?: string;
-}
+import { ToolHandler, AddEntryParams } from '../types/index.js';
+import { createAuthError, createSuccessResponse, createErrorResponse } from '../utils/responses.js';
+import { FoodEntryRepository } from '../repositories/index.js';
 
 export const addEntryHandler: ToolHandler<AddEntryParams> = async (
   entryData,
   userId,
-  env,
-  isAdmin = false
+  env
 ) => {
   if (!userId) {
     return createAuthError();
   }
 
+  if (!env?.DB) {
+    return createErrorResponse('Database not available. Please check your configuration.');
+  }
+
   try {
-    // Insert into D1 database
-    if (env?.DB) {
-      const entryId = crypto.randomUUID();
-      const entryDate =
-        entryData.entry_date || new Date().toISOString().split('T')[0];
+    const repository = new FoodEntryRepository(env.DB);
+    const entryId = await repository.create(entryData, userId);
 
-      await env.DB.prepare(
-        `
-        INSERT INTO food_entries (id, user_id, food_name, calories, protein_g, carbs_g, fat_g, meal_type, entry_date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `
-      )
-        .bind(
-          entryId,
-          userId,
-          entryData.food_name,
-          entryData.calories,
-          entryData.protein_g || null,
-          entryData.carbs_g || null,
-          entryData.fat_g || null,
-          entryData.meal_type || null,
-          entryDate
-        )
-        .run();
-
-      return createSuccessResponse(
-        `Successfully added "${entryData.food_name}" (${entryData.calories} calories) with ID ${entryId} for user ${userId}`
-      );
-    }
-
-    // Mock response for development
     return createSuccessResponse(
-      `Successfully added "${entryData.food_name}" (${entryData.calories} calories) for user ${userId}`
+      `Successfully added "${entryData.food_name}" (${entryData.calories} calories) with ID ${entryId} for user ${userId}`
     );
   } catch (error) {
     console.error('Error adding entry:', error);

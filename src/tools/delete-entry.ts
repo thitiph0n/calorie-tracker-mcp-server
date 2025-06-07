@@ -1,47 +1,30 @@
-import {
-  ToolHandler,
-  createAuthError,
-  createSuccessResponse,
-  createErrorResponse,
-} from './base.js';
-
-export interface DeleteEntryParams {
-  entry_id: string;
-}
+import { ToolHandler, DeleteEntryParams } from '../types/index.js';
+import { createAuthError, createSuccessResponse, createErrorResponse } from '../utils/responses.js';
+import { FoodEntryRepository } from '../repositories/index.js';
 
 export const deleteEntryHandler: ToolHandler<DeleteEntryParams> = async (
   { entry_id },
   userId,
-  env,
-  isAdmin = false
+  env
 ) => {
   if (!userId) {
     return createAuthError();
   }
 
+  if (!env?.DB) {
+    return createErrorResponse('Database not available. Please check your configuration.');
+  }
+
   try {
-    // Delete from D1 database with ownership check
-    if (env?.DB) {
-      const result = await env.DB.prepare(
-        `
-        DELETE FROM food_entries WHERE id = ? AND user_id = ?
-      `
-      )
-        .bind(entry_id, userId)
-        .run();
+    const repository = new FoodEntryRepository(env.DB);
+    const deleted = await repository.delete(entry_id, userId);
 
-      if (result.meta.changes === 0) {
-        return createErrorResponse(
-          `Entry ${entry_id} not found or you don't have permission to delete it.`
-        );
-      }
-
-      return createSuccessResponse(
-        `Successfully deleted entry ${entry_id} for user ${userId}`
+    if (!deleted) {
+      return createErrorResponse(
+        `Entry ${entry_id} not found or you don't have permission to delete it.`
       );
     }
 
-    // Mock response for development
     return createSuccessResponse(
       `Successfully deleted entry ${entry_id} for user ${userId}`
     );

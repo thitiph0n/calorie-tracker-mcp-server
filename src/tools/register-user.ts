@@ -1,24 +1,7 @@
-import {
-  ToolHandler,
-  createAuthError,
-  createSuccessResponse,
-  createErrorResponse,
-} from './base.js';
+import { ToolHandler, RegisterUserParams } from '../types/index.js';
+import { createAuthError, createSuccessResponse, createErrorResponse } from '../utils/responses.js';
 import { hashApiKey } from '../auth/middleware.js';
-
-export interface RegisterUserParams {
-  name: string;
-  email: string;
-  api_key?: string;
-}
-
-export interface RegisterUserResponse {
-  success: boolean;
-  message: string;
-  userId?: string;
-  apiKey?: string;
-  warning?: string;
-}
+import { UserRepository } from '../repositories/index.js';
 
 export const registerUserHandler: ToolHandler<RegisterUserParams> = async (
   userData,
@@ -30,64 +13,41 @@ export const registerUserHandler: ToolHandler<RegisterUserParams> = async (
     return createAuthError();
   }
 
-  // Check if user has admin role
   if (!isAdmin) {
     return createErrorResponse('Admin access required to register new users.');
   }
 
+  if (!env?.DB) {
+    return createErrorResponse('Database not available. Please check your configuration.');
+  }
+
   try {
-    // Insert into D1 database
-    if (env?.DB) {
-      const newUserId = crypto.randomUUID();
-      const apiKey = userData.api_key || `api-${crypto.randomUUID()}`;
+    const repository = new UserRepository(env.DB);
+    const apiKey = userData.api_key || `api-${crypto.randomUUID()}`;
 
-      // Check if email already exists
-      const existingUser = await env.DB.prepare(
-        'SELECT id FROM users WHERE email = ?'
-      )
-        .bind(userData.email)
-        .first();
-
-      if (existingUser) {
-        return createErrorResponse(
-          `User with email ${userData.email} already exists.`
-        );
-      }
-
-      // Hash the API key for secure storage
-      const apiKeyHash = await hashApiKey(apiKey);
-
-      // Check if API key hash already exists
-      const existingApiKey = await env.DB.prepare(
-        'SELECT id FROM users WHERE api_key_hash = ?'
-      )
-        .bind(apiKeyHash)
-        .first();
-
-      if (existingApiKey) {
-        return createErrorResponse(
-          `API key already exists. Please provide a different one.`
-        );
-      }
-
-      await env.DB.prepare(
-        `
-        INSERT INTO users (id, name, email, api_key_hash, role)
-        VALUES (?, ?, ?, ?, 'user')
-      `
-      )
-        .bind(newUserId, userData.name, userData.email, apiKeyHash)
-        .run();
-
-      return createSuccessResponse(
-        `Successfully registered user "${userData.name}" with ID ${newUserId}.\nAPI Key: ${apiKey}\nEmail: ${userData.email}`
+    // Check if email already exists
+    const existingUser = await repository.findByEmail(userData.email);
+    if (existingUser) {
+      return createErrorResponse(
+        `User with email ${userData.email} already exists.`
       );
     }
 
-    // Mock response for development
-    const mockApiKey = userData.api_key || `api-${Date.now()}`;
+    // Hash the API key for secure storage
+    const apiKeyHash = await hashApiKey(apiKey);
+
+    // Check if API key hash already exists
+    const existingApiKey = await repository.findByApiKeyHash(apiKeyHash);
+    if (existingApiKey) {
+      return createErrorResponse(
+        `API key already exists. Please provide a different one.`
+      );
+    }
+
+    const newUserId = await repository.create(userData, apiKeyHash);
+
     return createSuccessResponse(
-      `Successfully registered user "${userData.name}".\nAPI Key: ${mockApiKey}\nEmail: ${userData.email}`
+      `Successfully registered user "${userData.name}" with ID ${newUserId}.\nAPI Key: ${apiKey}\nEmail: ${userData.email}`
     );
   } catch (error) {
     console.error('Error registering user:', error);
