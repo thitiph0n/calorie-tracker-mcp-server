@@ -10,7 +10,11 @@
     "lint:fix": "biome lint --fix",
     "start": "wrangler dev",
     "cf-typegen": "wrangler types",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.4",
@@ -22,7 +26,11 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^22.15.21",
+    "@types/uuid": "^10.0.0",
+    "@vitest/ui": "^3.2.2",
+    "jsdom": "^26.1.0",
     "typescript": "^5.8.3",
+    "vitest": "^3.2.2",
     "wrangler": "^4.16.1"
   },
   "packageManager": "pnpm@9.11.0+sha512.0a203ffaed5a3f63242cd064c8fb5892366c103e328079318f78062f24ea8c9d50bc6a47aa3567cabefd824d170e78fa2745ed1f16b132e16436146b7688f19b"
