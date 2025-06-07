@@ -13,16 +13,16 @@ describe('calculations', () => {
   describe('calculateBMR', () => {
     it('should calculate BMR correctly for males', () => {
       const bmr = calculateBMR(70, 175, 30, 'male');
-      // BMR = 88.362 + (13.397 × 70) + (4.799 × 175) - (5.677 × 30)
-      // BMR = 88.362 + 937.79 + 839.825 - 170.31 = 1695.667
-      expect(bmr).toBe(1696); // Rounded
+      // Mifflin-St Jeor: BMR = (10 × 70) + (6.25 × 175) - (5 × 30) + 5
+      // BMR = 700 + 1093.75 - 150 + 5 = 1648.75
+      expect(bmr).toBe(1649); // Rounded
     });
 
     it('should calculate BMR correctly for females', () => {
       const bmr = calculateBMR(60, 165, 25, 'female');
-      // BMR = 447.593 + (9.247 × 60) + (3.098 × 165) - (4.330 × 25)
-      // BMR = 447.593 + 554.82 + 511.17 - 108.25 = 1405.333
-      expect(bmr).toBe(1405); // Rounded
+      // Mifflin-St Jeor: BMR = (10 × 60) + (6.25 × 165) - (5 × 25) - 161
+      // BMR = 600 + 1031.25 - 125 - 161 = 1345.25
+      expect(bmr).toBe(1345); // Rounded
     });
   });
 

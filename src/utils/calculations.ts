@@ -12,9 +12,32 @@ const ACTIVITY_MULTIPLIERS = {
 } as const;
 
 /**
- * Calculate BMR using Harris-Benedict equation
+ * Calculate BMR using Mifflin-St Jeor equation (gold standard)
+ * More accurate than Harris-Benedict, especially for overweight individuals
  */
 export function calculateBMR(
+  weight_kg: number,
+  height_cm: number,
+  age: number,
+  gender: 'male' | 'female'
+): number {
+  // Mifflin-St Jeor equation: BMR = (10 × weight in kg) + (6.25 × height in cm) - (5 × age in years) + gender offset
+  const baseBMR = 10 * weight_kg + 6.25 * height_cm - 5 * age;
+  
+  if (gender === 'male') {
+    // Add +5 for males
+    return Math.round(baseBMR + 5);
+  } else {
+    // Add -161 for females
+    return Math.round(baseBMR - 161);
+  }
+}
+
+/**
+ * Calculate BMR using Harris-Benedict equation (legacy/alternative method)
+ * Kept for comparison purposes
+ */
+export function calculateBMRHarrisBenedict(
   weight_kg: number,
   height_cm: number,
   age: number,

@@ -7,7 +7,7 @@ MCP server for tracking daily calorie intake with accurate BMR/TDEE calculations
 ## Features
 
 - **Food Tracking**: Add, update, delete food entries with macros
-- **Profile Management**: BMR/TDEE calculations using Harris-Benedict equation
+- **Profile Management**: BMR/TDEE calculations using Mifflin-St Jeor equation
 - **Historical Data**: Track weight, body composition over time  
 - **Secure**: API key authentication with role-based access
 
@@ -60,10 +60,10 @@ Update `wrangler.jsonc` with your database ID.
 
 ## BMR/TDEE Calculations
 
-Uses Harris-Benedict equation (1984 revision):
+Uses Mifflin-St Jeor equation (gold standard):
 
-**Male:** `BMR = 88.362 + (13.397 × weight) + (4.799 × height) - (5.677 × age)`  
-**Female:** `BMR = 447.593 + (9.247 × weight) + (3.098 × height) - (4.330 × age)`
+**Male:** `BMR = (10 × weight) + (6.25 × height) - (5 × age) + 5`  
+**Female:** `BMR = (10 × weight) + (6.25 × height) - (5 × age) - 161`
 
 **TDEE:** `BMR × Activity Multiplier` (1.2 - 1.9)
 
