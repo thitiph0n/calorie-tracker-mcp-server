@@ -1,50 +1,88 @@
-# Building a Remote MCP Server on Cloudflare (Without Auth)
+# Calorie Tracker MCP Server
 
-This example allows you to deploy a remote MCP server that doesn't require authentication on Cloudflare Workers. 
+A Model Context Protocol (MCP) server for tracking daily calorie intake, built on Cloudflare Workers with D1 database and role-based authentication.
 
-## Get started: 
+## Features
 
-[![Deploy to Workers](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/cloudflare/ai/tree/main/demos/remote-mcp-authless)
+- **Role-Based Authentication**: Admin and user roles with proper access control
+- **Calorie Tracking**: Add, update, delete, and list food entries
+- **User Management**: Admin tools for registering users and revoking API keys
+- **Database-Driven**: Uses Cloudflare D1 for secure data storage
+- **MCP Compatible**: Works with Claude Desktop and other MCP clients
 
-This will deploy your MCP server to a URL like: `remote-mcp-server-authless.<your-account>.workers.dev/sse`
+## Quick Setup
 
-Alternatively, you can use the command line below to get the remote MCP Server created on your local machine:
+### 1. Deploy and Configure
+
 ```bash
-npm create cloudflare@latest -- my-mcp-server --template=cloudflare/ai/demos/remote-mcp-authless
+# Clone and install dependencies
+npm install
+
+# Apply database migrations (creates tables and admin user)
+npx wrangler d1 migrations apply prod-calorie-tracker --local
+
+# Start development server
+npm run dev
 ```
 
-## Customizing your MCP Server
+### 2. Admin User
 
-To add your own [tools](https://developers.cloudflare.com/agents/model-context-protocol/tools/) to the MCP server, define each tool inside the `init()` method of `src/index.ts` using `this.server.tool(...)`. 
+The migration automatically creates an admin user:
 
-## Connect to Cloudflare AI Playground
+- **Email**: `admin@calorie-tracker.com`
+- **API Key**: `admin-api-key-2025`
+- **Role**: `admin`
 
-You can connect to your MCP server from the Cloudflare AI Playground, which is a remote MCP client:
+### 3. Connect to Claude Desktop
 
-1. Go to https://playground.ai.cloudflare.com/
-2. Enter your deployed MCP server URL (`remote-mcp-server-authless.<your-account>.workers.dev/sse`)
-3. You can now use your MCP tools directly from the playground!
-
-## Connect Claude Desktop to your MCP server
-
-You can also connect to your remote MCP server from local MCP clients, by using the [mcp-remote proxy](https://www.npmjs.com/package/mcp-remote). 
-
-To connect to your MCP server from Claude Desktop, follow [Anthropic's Quickstart](https://modelcontextprotocol.io/quickstart/user) and within Claude Desktop go to Settings > Developer > Edit Config.
-
-Update with this configuration:
+Update your Claude Desktop MCP configuration:
 
 ```json
 {
   "mcpServers": {
-    "calculator": {
+    "calorie-tracker": {
       "command": "npx",
-      "args": [
-        "mcp-remote",
-        "http://localhost:8787/sse"  // or remote-mcp-server-authless.your-account.workers.dev/sse
-      ]
+      "args": ["mcp-remote", "http://localhost:8787/sse"],
+      "env": {
+        "BEARER_TOKEN": "admin-api-key-2025"
+      }
     }
   }
 }
 ```
 
-Restart Claude and you should see the tools become available. 
+## Available Tools
+
+### User Tools (All authenticated users)
+
+- `list_entries` - List daily food entries with date filtering
+- `add_entry` - Add new food entries with nutritional data
+- `update_entry` - Update existing food entries
+- `delete_entry` - Delete food entries
+
+### Admin Tools (Admin role only)
+
+- `register_user` - Register new users with unique API keys
+- `revoke_user` - Revoke user API keys by ID or email
+
+## Database Schema
+
+### Users Table
+
+- `id` - Primary key
+- `name` - User's display name
+- `email` - Unique email address
+- `api_key_hash` - SHA-256 hashed API key
+- `role` - Either 'user' or 'admin'
+- `created_at` - Account creation timestamp
+
+### Food Entries Table
+
+- `id` - Primary key
+- `user_id` - Foreign key to users table
+- `food_name` - Name of the food item
+- `calories` - Calorie count
+- `protein_g`, `carbs_g`, `fat_g` - Macronutrients
+- `meal_type` - breakfast, lunch, dinner, or snack
+- `entry_date` - Date of the meal
+- `created_at`, `updated_at` - Timestamps
