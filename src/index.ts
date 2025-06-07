@@ -14,6 +14,11 @@ import {
   RegisterUserParams,
   revokeUserHandler,
   RevokeUserParams,
+  getProfile,
+  updateProfile,
+  getProfileHistory,
+  UpdateProfileParams,
+  GetProfileHistoryParams,
 } from './tools/index.js';
 import z from 'zod';
 
@@ -224,6 +229,107 @@ export class CalorieTrackerMCP extends McpAgent<Env, {}, Props> {
           this.env,
           this.props.isAdmin
         );
+      }
+    );
+
+    // Get user profile
+    this.server.tool(
+      'get_profile',
+      'Get current user profile with calculated BMR/TDEE metrics',
+      {},
+      async (params) => {
+        return getProfile(params, this.props.userId, this.env);
+      }
+    );
+
+    // Update user profile
+    this.server.tool(
+      'update_profile',
+      'Update user profile information and tracking data',
+      {
+        height_cm: z
+          .number()
+          .min(50, 'Height must be at least 50cm')
+          .max(300, 'Height must be at most 300cm')
+          .optional()
+          .describe('Height in centimeters'),
+        age: z
+          .number()
+          .int()
+          .min(1, 'Age must be at least 1')
+          .max(150, 'Age must be at most 150')
+          .optional()
+          .describe('Age in years'),
+        gender: z
+          .enum(['male', 'female'])
+          .optional()
+          .describe('Gender (male or female)'),
+        activity_level: z
+          .enum(['sedentary', 'light', 'moderate', 'active', 'very_active'])
+          .optional()
+          .describe('Activity level for TDEE calculation'),
+        weight_kg: z
+          .number()
+          .min(1, 'Weight must be at least 1kg')
+          .max(1000, 'Weight must be at most 1000kg')
+          .optional()
+          .describe('Current weight in kilograms'),
+        muscle_mass_kg: z
+          .number()
+          .min(0, 'Muscle mass cannot be negative')
+          .max(1000, 'Muscle mass must be at most 1000kg')
+          .optional()
+          .describe('Muscle mass in kilograms'),
+        body_fat_percentage: z
+          .number()
+          .min(0, 'Body fat percentage cannot be negative')
+          .max(100, 'Body fat percentage cannot exceed 100%')
+          .optional()
+          .describe('Body fat percentage (0-100)'),
+      },
+      async (params) => {
+        return updateProfile(params as any, this.props.userId, this.env);
+      }
+    );
+
+    // Get profile history
+    this.server.tool(
+      'get_profile_history',
+      'Get historical profile tracking data with optional date filtering',
+      {
+        date: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
+          .optional()
+          .describe('Specific date to filter by (YYYY-MM-DD format)'),
+        start_date: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
+          .optional()
+          .describe('Start date for date range filter (YYYY-MM-DD format)'),
+        end_date: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be in YYYY-MM-DD format')
+          .optional()
+          .describe('End date for date range filter (YYYY-MM-DD format)'),
+        limit: z
+          .number()
+          .int()
+          .min(1, 'Limit must be at least 1')
+          .max(100, 'Maximum limit is 100')
+          .default(10)
+          .optional()
+          .describe('Maximum number of entries to return'),
+        offset: z
+          .number()
+          .int()
+          .min(0, 'Offset cannot be negative')
+          .default(0)
+          .optional()
+          .describe('Number of entries to skip for pagination'),
+      },
+      async (params) => {
+        return getProfileHistory(params as any, this.props.userId, this.env);
       }
     );
   }

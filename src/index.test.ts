@@ -114,8 +114,8 @@ describe('CalorieTrackerMCP', () => {
         expect.any(Function)
       );
 
-      // Should have registered 6 tools
-      expect(mcpInstance.server.tool).toHaveBeenCalledTimes(6);
+      // Should have registered 9 tools (original 6 + 3 profile tools)
+      expect(mcpInstance.server.tool).toHaveBeenCalledTimes(9);
     });
 
     it('should configure list_entries tool with correct schema', async () => {
@@ -173,11 +173,10 @@ describe('CalorieTrackerMCP', () => {
       const params = { date: '2024-01-01', limit: 5 };
       await handler(params);
 
-      expect(listEntriesHandler).toHaveBeenCalledWith(
-        params,
-        'test-user',
-        { DB: {}, MCP_OBJECT: {} }
-      );
+      expect(listEntriesHandler).toHaveBeenCalledWith(params, 'test-user', {
+        DB: {},
+        MCP_OBJECT: {},
+      });
     });
 
     it('should call addEntryHandler with correct parameters', async () => {
@@ -191,11 +190,10 @@ describe('CalorieTrackerMCP', () => {
       const params = { food_name: 'Apple', calories: 80 };
       await handler(params);
 
-      expect(addEntryHandler).toHaveBeenCalledWith(
-        params,
-        'test-user',
-        { DB: {}, MCP_OBJECT: {} }
-      );
+      expect(addEntryHandler).toHaveBeenCalledWith(params, 'test-user', {
+        DB: {},
+        MCP_OBJECT: {},
+      });
     });
 
     it('should call admin handlers with correct admin flag', async () => {

@@ -36,6 +36,35 @@ export interface User {
   updated_at?: string;
 }
 
+// User profile types
+export interface UserProfile {
+  user_id: string;
+  height_cm: number;
+  age: number;
+  gender: 'male' | 'female';
+  activity_level: 'sedentary' | 'light' | 'moderate' | 'active' | 'very_active';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProfileTracking {
+  id: string;
+  user_id: string;
+  weight_kg?: number;
+  muscle_mass_kg?: number;
+  body_fat_percentage?: number;
+  bmr_calories?: number;
+  tdee_calories?: number;
+  recorded_date: string;
+  created_at: string;
+}
+
+export interface ProfileWithCalculations extends UserProfile {
+  latest_tracking?: ProfileTracking;
+  bmr_calories?: number;
+  tdee_calories?: number;
+}
+
 // Tool parameter types
 export interface AddEntryParams {
   food_name: string;
@@ -78,3 +107,26 @@ export interface RevokeUserParams {
   email?: string;
 }
 
+// Profile tool parameter types
+export interface UpdateProfileParams {
+  height_cm?: number;
+  age?: number;
+  gender?: 'male' | 'female';
+  activity_level?:
+    | 'sedentary'
+    | 'light'
+    | 'moderate'
+    | 'active'
+    | 'very_active';
+  weight_kg?: number;
+  muscle_mass_kg?: number;
+  body_fat_percentage?: number;
+}
+
+export interface GetProfileHistoryParams {
+  date?: string;
+  start_date?: string;
+  end_date?: string;
+  limit?: number;
+  offset?: number;
+}

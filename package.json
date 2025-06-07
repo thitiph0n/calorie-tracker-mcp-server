@@ -1,6 +1,6 @@
 {
-  "name": "remote-mcp-server-authless",
-  "version": "0.0.0",
+  "name": "calorie-tracker-mcp-server",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "deploy": "wrangler deploy",
@@ -14,7 +14,20 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "migrate:prod": "npm run migrate:prod:apply",
+    "migrate:prod:apply": "wrangler d1 migrations apply calorie-tracker --remote --config wrangler.production.jsonc",
+    "migrate:prod:status": "wrangler d1 migrations list calorie-tracker --remote --config wrangler.production.jsonc",
+    "migrate:prod:manual": "node scripts/migrate-prod.js",
+    "migrate:prod:verify": "wrangler d1 execute calorie-tracker --remote --config wrangler.production.jsonc --command=\"SELECT name FROM d1_migrations ORDER BY id DESC LIMIT 5;\"",
+    "db:prod:query": "wrangler d1 execute calorie-tracker --remote --config wrangler.production.jsonc",
+    "db:prod:backup": "node scripts/backup-prod.js",
+    "db:utils": "node scripts/db-utils.js",
+    "db:status": "node scripts/db-utils.js status",
+    "db:status:prod": "CONFIRM_PROD_OPERATION=yes node scripts/db-utils.js status prod",
+    "db:tables": "node scripts/db-utils.js tables",
+    "db:users": "node scripts/db-utils.js users",
+    "db:reset:dev": "node scripts/db-utils.js reset-dev"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.11.4",
