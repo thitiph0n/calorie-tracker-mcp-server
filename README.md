@@ -5,10 +5,10 @@ MCP server for tracking daily calorie intake. Built on Cloudflare Workers with D
 ## Setup
 
 ```bash
-npm install
+pnpm install
 npx wrangler d1 create YOUR_DATABASE_NAME
 npx wrangler d1 migrations apply YOUR_DATABASE_NAME
-npm run dev
+pnpm run dev
 ```
 
 Update `wrangler.jsonc` with your database ID.
