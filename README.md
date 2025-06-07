@@ -33,12 +33,18 @@ Add to Claude Desktop config:
 
 ## Tools
 
-**User Tools:**
+**Food Tracking Tools:**
 
 - `list_entries` - List food entries
 - `add_entry` - Add food entry  
 - `update_entry` - Update entry
 - `delete_entry` - Delete entry
+
+**Profile Management Tools:**
+
+- `get_profile` - Get user profile with BMR/TDEE calculations
+- `update_profile` - Update profile data (height, age, gender, activity level, weight, muscle mass, body fat %)
+- `get_profile_history` - Get historical profile tracking data
 
 **Admin Tools:**
 
