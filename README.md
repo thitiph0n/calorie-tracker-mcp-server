@@ -1,21 +1,28 @@
 # Calorie Tracker MCP Server
 
-MCP server for tracking daily calorie intake. Built on Cloudflare Workers with D1 database.
+![Calorie Tracker MCP Server](cover.svg)
 
-## Setup
+MCP server for tracking daily calorie intake with accurate BMR/TDEE calculations. Built on Cloudflare Workers with D1 database.
+
+## Features
+
+- **Food Tracking**: Add, update, delete food entries with macros
+- **Profile Management**: BMR/TDEE calculations using Harris-Benedict equation
+- **Historical Data**: Track weight, body composition over time  
+- **Secure**: API key authentication with role-based access
+
+## Quick Setup
 
 ```bash
 pnpm install
-npx wrangler d1 create YOUR_DATABASE_NAME
-npx wrangler d1 migrations apply YOUR_DATABASE_NAME
+npx wrangler d1 create calorie-tracker
+npx wrangler d1 migrations apply calorie-tracker
 pnpm run dev
 ```
 
 Update `wrangler.jsonc` with your database ID.
 
-## Configuration
-
-Add to Claude Desktop config:
+## Claude Desktop Config
 
 ```json
 {
@@ -33,20 +40,45 @@ Add to Claude Desktop config:
 
 ## Tools
 
-**Food Tracking Tools:**
+**Food Tracking:**
 
-- `list_entries` - List food entries
-- `add_entry` - Add food entry  
-- `update_entry` - Update entry
+- `list_entries` - List food entries with pagination
+- `add_entry` - Add food entry with macros
+- `update_entry` - Update existing entry
 - `delete_entry` - Delete entry
 
-**Profile Management Tools:**
+**Profile Management:**
 
-- `get_profile` - Get user profile with BMR/TDEE calculations
-- `update_profile` - Update profile data (height, age, gender, activity level, weight, muscle mass, body fat %)
-- `get_profile_history` - Get historical profile tracking data
+- `get_profile` - Get profile with BMR/TDEE calculations
+- `update_profile` - Update profile data (height, weight, activity level)
+- `get_profile_history` - Historical tracking data
 
-**Admin Tools:**
+**Admin:**
 
 - `register_user` - Register new user
 - `revoke_user` - Revoke user access
+
+## BMR/TDEE Calculations
+
+Uses Harris-Benedict equation (1984 revision):
+
+**Male:** `BMR = 88.362 + (13.397 × weight) + (4.799 × height) - (5.677 × age)`  
+**Female:** `BMR = 447.593 + (9.247 × weight) + (3.098 × height) - (4.330 × age)`
+
+**TDEE:** `BMR × Activity Multiplier` (1.2 - 1.9)
+
+## Development
+
+```bash
+pnpm test              # Run tests
+pnpm run deploy        # Deploy to production
+pnpm run type-check    # TypeScript validation
+```
+
+## Tech Stack
+
+- **Runtime**: Cloudflare Workers
+- **Database**: D1 (SQLite)
+- **Language**: TypeScript
+- **Validation**: Zod
+- **Testing**: Vitest
