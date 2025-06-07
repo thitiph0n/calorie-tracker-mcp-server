@@ -13,7 +13,7 @@
     {
       "binding": "DB",
       "database_name": "calorie-tracker",
-      "database_id": "YOUR_DATABASE_ID_HERE"
+      "database_id": "PLACEHOLDER_DATABASE_ID"
     }
   ],
   

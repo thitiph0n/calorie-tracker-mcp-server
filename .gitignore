@@ -21,6 +21,10 @@ build/
 .dev.vars*
 wrangler.toml.local
 
+# Production wrangler configurations with credentials
+wrangler.production.jsonc
+wrangler.staging.jsonc
+
 # IDE and editor files
 .vscode/
 .idea/
