@@ -8,26 +8,29 @@
   "compatibility_date": "2025-05-25",
   "compatibility_flags": ["nodejs_compat"],
   
-  // D1 Database Configuration
   "d1_databases": [
     {
       "binding": "DB",
-      "database_name": "calorie-tracker",
-      "database_id": "PLACEHOLDER_DATABASE_ID"
+      "database_name": "prod-calorie-tracker",
+      "database_id": "f5f996b7-76a6-4ab7-b640-594a674d4ef7"
     }
   ],
-  
-  // Observability (optional)
+
+  "kv_namespaces": [
+    {
+      "binding": "OAUTH_KV",
+      "id": "be2acdb7c72d426ca8230112af52aee5"
+    }
+  ],
+
   "observability": {
     "enabled": true
   },
 
-  // Environment Variables for development
-  // Note: ADMIN_API_KEY moved to secrets for security
   "vars": {
+    "ADMIN_API_KEY": "dev-secret-change-in-production"
   },
 
-  // Durable Object bindings for MCP Agent
   "durable_objects": {
     "bindings": [
       {
@@ -37,46 +40,10 @@
     ]
   },
 
-  // Migrations to enable SQL for Durable Objects
   "migrations": [
     {
       "tag": "v1",
       "new_sqlite_classes": ["CalorieTrackerMCP"]
     }
   ],
-
-	/**
-	 * Smart Placement
-	 * Docs: https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
-	 */
-	// "placement": { "mode": "smart" },
-
-	/**
-	 * Bindings
-	 * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
-	 * databases, object storage, AI inference, real-time communication and more.
-	 * https://developers.cloudflare.com/workers/runtime-apis/bindings/
-	 */
-
-	/**
-	 * Environment Variables
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
-	 */
-	// "vars": { "MY_VARIABLE": "production_value" },
-	/**
-	 * Note: Use secrets to store sensitive data.
-	 * https://developers.cloudflare.com/workers/configuration/secrets/
-	 */
-
-	/**
-	 * Static Assets
-	 * https://developers.cloudflare.com/workers/static-assets/binding/
-	 */
-	// "assets": { "directory": "./public/", "binding": "ASSETS" },
-
-	/**
-	 * Service Bindings (communicate between multiple Workers)
-	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
-	 */
-	// "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
 }

@@ -1,6 +1,6 @@
 import { McpAgent } from 'agents/mcp';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
-import { withAuth } from './auth/middleware.js';
+import { OAuthHandler, withOAuth } from './auth/oauth-provider.js';
 import {
   listEntriesHandler,
   ListEntriesParams,
@@ -336,23 +336,39 @@ export class CalorieTrackerMCP extends McpAgent<Env, {}, Props> {
 }
 
 export default {
-  fetch: withAuth(
-    async (
-      request: Request,
-      env: Env,
-      ctx: ExecutionContext,
-      userId: string,
-      isAdmin: boolean
-    ) => {
-      const url = new URL(request.url);
+  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    const url = new URL(request.url);
 
-      // Set the props in the execution context
+    if (url.pathname === '/signup') {
+      return OAuthHandler.signup(request, env);
+    }
+
+    if (url.pathname === '/login') {
+      return OAuthHandler.login(request, env);
+    }
+
+    if (url.pathname === '/oauth/authorize') {
+      return OAuthHandler.authorize(request, env);
+    }
+
+    if (url.pathname === '/oauth/token') {
+      return OAuthHandler.token(request, env);
+    }
+
+    if (url.pathname === '/oauth/register') {
+      return OAuthHandler.register(request, env);
+    }
+
+    if (url.pathname === '/.well-known/oauth-authorization-server') {
+      return OAuthHandler.metadata(request);
+    }
+
+    return withOAuth(request, env, ctx, async (request, env, ctx, userId, isAdmin) => {
       ctx.props = {
         userId,
         isAdmin,
       };
 
-      // Handle MCP endpoints
       if (url.pathname === '/sse' || url.pathname === '/sse/message') {
         return CalorieTrackerMCP.serveSSE('/sse').fetch(request, env, ctx);
       }
@@ -361,13 +377,60 @@ export default {
         return CalorieTrackerMCP.serve('/mcp').fetch(request, env, ctx);
       }
 
-      // Default response for other endpoints
+      if (url.pathname === '/') {
+        return new Response(
+          `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calorie Tracker MCP Server</title>
+  <style>
+    body { font-family: system-ui; max-width: 600px; margin: 100px auto; padding: 20px; }
+    h1 { font-size: 32px; margin-bottom: 10px; }
+    p { color: #666; margin-bottom: 30px; }
+    a { display: inline-block; padding: 12px 24px; background: #000; color: white; text-decoration: none; border-radius: 5px; margin: 10px 10px 10px 0; }
+    a:hover { background: #333; }
+    .endpoints { margin-top: 40px; }
+    .endpoint { padding: 10px; background: #f5f5f5; margin: 10px 0; border-radius: 5px; }
+  </style>
+</head>
+<body>
+  <h1>🍎 Calorie Tracker MCP Server</h1>
+  <p>Track your daily calorie intake with Claude</p>
+
+  <a href="/signup">Create Account</a>
+  <a href="/login">Sign In</a>
+
+  <div class="endpoints">
+    <h2>API Endpoints</h2>
+    <div class="endpoint"><strong>GET /signup</strong> - User registration</div>
+    <div class="endpoint"><strong>GET /login</strong> - User login</div>
+    <div class="endpoint"><strong>GET /sse</strong> - MCP SSE endpoint</div>
+    <div class="endpoint"><strong>GET /oauth/authorize</strong> - OAuth authorization</div>
+    <div class="endpoint"><strong>POST /oauth/token</strong> - OAuth token exchange</div>
+    <div class="endpoint"><strong>POST /oauth/register</strong> - OAuth client registration</div>
+    <div class="endpoint"><strong>GET /.well-known/oauth-authorization-server</strong> - OAuth metadata</div>
+  </div>
+</body>
+</html>`,
+          {
+            status: 200,
+            headers: { 'Content-Type': 'text/html' },
+          }
+        );
+      }
+
       return new Response(
         JSON.stringify({
           message: 'Calorie Tracker API',
           endpoints: [
-            { path: '/mcp', description: 'MCP endpoint' },
-            { path: '/sse', description: 'SSE endpoint' },
+            { path: '/mcp', description: 'MCP endpoint (OAuth protected)' },
+            { path: '/sse', description: 'SSE endpoint (OAuth protected)' },
+            { path: '/oauth/authorize', description: 'OAuth authorization endpoint' },
+            { path: '/oauth/token', description: 'OAuth token endpoint' },
+            { path: '/oauth/register', description: 'OAuth client registration' },
+            { path: '/.well-known/oauth-authorization-server', description: 'OAuth metadata' },
           ],
         }),
         {
@@ -375,6 +438,6 @@ export default {
           headers: { 'Content-Type': 'application/json' },
         }
       );
-    }
-  ),
+    });
+  },
 };
